@@ -12,7 +12,6 @@ def loc(contents):
 
 def main():
     (options, args) = parser.parse_args()
-  
     if options.v:
         print "verbose mode on"
     if options.f:
@@ -21,7 +20,8 @@ def main():
         file = open(options.f,'r')
         contents = file.read()
         file.close()
-        print "contents of file: ",contents
+        if options.v:
+            print "contents of file: ",contents
         print loc(contents)
 
 parser = OptionParser()
@@ -35,7 +35,13 @@ parser.add_option("-f",
     "--file",
     dest="f",
     metavar="FILE",
-    help="name of input file to search")
+    help="input file to search")
+parser.add_option("-o",
+    "--outfile",
+    dest="o",
+    default="location_data.txt",
+    metavar="OUTPUT_FILE",
+    help="file to write output of location search")
         
 if __name__ == "__main__":
     main()
