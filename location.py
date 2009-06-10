@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import re
 from optparse import OptionParser
 
@@ -24,51 +25,46 @@ def ltweet(contents):
 
 def main():
     (options, args) = parser.parse_args()
+    out = open(options.f,'w')
+    if options.s:
+        out = sys.stdout
     if options.v: #verbose option
-        print "verbose mode on"
-        print "input file: ", options.f
+        print >>out,"verbose mode on"
+        print >>out,"input file: %s" % options.f
     file = open(options.f,'r')
     contents = file.read()              #contents of input file
     file.close()
     location = loc(contents)            #address
     if options.v: #verbose option
-#        print "contents of file: ",contents
-        print location
-    ofile = open(options.o,'w')
-    ofile.write(location) #write to output file
-    ofile.close()
-    #TEMPORARY
+        print >>out,"contents of file: %s" % contents
+    print >>out,location
     tweets = ltweet(contents)
-    if options.v: #verbose option
-        print tweets
+    if tweets: #tweets contain l:____ refs
+        print >>out,tweets
 
 parser = OptionParser()
-#verbose
-parser.add_option(
+parser.add_option(                      #verbose
     "-v",
     "--verbose",
     action="store_true",
     dest="v",
     default=False,
     help="turn on verbose mode")
-#input file
-parser.add_option(
+parser.add_option(                      #input file
     "-f",
     "--file",
     dest="f",
     default="infile.html",
     metavar="FILE",
     help="input file to search")
-#use stdout for output
-parser.add_option(
+parser.add_option(                      #use stdout for output
     "-s",
     "--stdout",
     action="store_true",
     dest="s",
     default=False,
     help="use standard output instead of output file")
-#output file
-parser.add_option(
+parser.add_option(                      #output file
     "-o",
     "--outfile",
     dest="o",

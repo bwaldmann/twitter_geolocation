@@ -4,7 +4,6 @@ import sys
 import commands
 import re
 from location import loc,ltweet
-#import location
 from optparse import OptionParser
 
 def main():
@@ -12,7 +11,7 @@ def main():
     statout = commands.getstatusoutput('ls '+options.d+' > '+options.f)
     users = open(options.f,'r')         #user listing
     out = open(options.o,'w')           #output file
-    if options.s:  #if no output file
+    if options.s: #if no output file
         out = sys.stdout #print to stdout
     numusers = 0.0                      #number of users
     locusers = 0.0                      #number of users with location
@@ -44,10 +43,10 @@ def main():
         if tweets: #l:___ found
             print >>out,str(tweets)
             twtusers += 1
-    percent = locusers/numusers       # % users with location 
-    pcoord = coordusers/numusers      # % users with coordinates
-    plcoord = coordusers/locusers     # % locations that have coordinates
-    ptweet = twtusers/numusers        # % users using l:____
+    percent = locusers/numusers         # % users with location 
+    pcoord = coordusers/numusers        # % users with coordinates
+    plcoord = coordusers/locusers       # % locations that have coordinates
+    ptweet = twtusers/numusers          # % users using l:____
     print >>out,"\n"
     print >>out,"number of users: %d" % numusers
     print >>out,"number of users with location: %d" % locusers
@@ -60,40 +59,35 @@ def main():
     users.close()
 
 parser = OptionParser()
-#verbose
-parser.add_option(
+parser.add_option(                      #verbose
     "-v",
     "--verbose",
     action="store_true",
     dest="v",
     default=False,
     help="turn on verbose mode" )
-#directory with user pages
-parser.add_option(
+parser.add_option(                      #directory with user pages
     "-d",
     "--directory",
     dest="d",
     metavar="DIR",
     default="/project/wdim/crawlData/good_sample/",
     help="directory to find user pages in" )
-#file for user listing
-parser.add_option(
+parser.add_option(                      #file for user listing
     "-f",
     "--file",
     dest="f",
     metavar="FILE",
     default="users.txt",
     help="file to write user page names to")
-#use stdout for output
-parser.add_option(
+parser.add_option(                      #use stdout for output
     "-s",
     "--stdout",
     action="store_true",
     dest="s",
     default=False,
     help="use standard output instead of output file")
-#output file
-parser.add_option(
+parser.add_option(                      #output file
     "-o",
     "--outfile",
     dest="o",
