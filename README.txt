@@ -18,8 +18,8 @@ location.py
 
   - from location import loc,ltweet
         contents = "string to search"
-        loc(contents)           # finds user:address pair
-        ltweet(contents)        # finds instances of l:____ matches
+        loc(contents)           # returns address:coordinates pair
+        ltweet(contents)        # returns instances of l:____ matches
 
 ========================================================================
 crawler.py

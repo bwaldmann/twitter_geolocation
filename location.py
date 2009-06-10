@@ -7,21 +7,24 @@ from optparse import OptionParser
 def loc(contents):
     a = re.compile("(?i)<span class=\"adr\">[\w, -\.:]+</span>")
     loc = a.search(contents)
+    coordinates = False
     if loc: #location specified
         location = contents[loc.start():loc.end()] #isolate location
+        location = location[location.find(">")+1:location.rfind("<")]
         c = re.compile("\d{1,3}\.\d{2,6}, ?-?\d{1,3}\.\d{2,6}")
         coord = c.search(location)
-        #return user address
         if coord: #coordinates specified
-            return location[coord.start():coord.end()]
-        else: #coordinates not specified
-            return location[location.find(">")+1:location.rfind("<")]
+            coordinates = location[coord.start():coord.end()]
+    else:
+        location = False
+    return [location,coordinates]
 
 def ltweet(contents):
     l = re.compile("(?i) l:\w+")
     ltweet = l.findall(contents)
-    if ltweet:
-        return ltweet
+    if not ltweet:
+        ltweet = False
+    return ltweet
 
 def main():
     (options, args) = parser.parse_args()

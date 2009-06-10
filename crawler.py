@@ -22,26 +22,23 @@ def main():
         user = options.d+line[0:-1] #absolute path to user page
         username = user[user.rfind('/')+1:user.rfind('.')] #isolate username
         if options.v: #verbose option
-            print >>out,"username: ",username
+            print >>out,"username: %s" % username
         page = open(user,'r')
         contents = page.read()          #user page contents (html)
         page.close()
-        location = loc(contents)        #user location
-        c = re.compile("\d{1,3}\.\d{2,6}, ?-?\d{1,3}\.\d{2,6}")
+        location = loc(contents)
         if options.v: #verbose option
-            print >>out,location
-        if location: #location specified
-            coord = c.match(location)   #match coordinates
-            if coord: #location includes coordinates
-                coordinates = location[coord.start():coord.end()]
-                print >>out,username,': ',coordinates
-                coordusers += 1
-            else:
-                print >>out,username,': ',location
+            print >>out,location[0]
+        if location[1]: #coordinates specified
+            print >>out,"%s : %s : %s" % (username,location[0],location[1])
+            locusers += 1
+            coordusers += 1
+        elif location[0]: #location (no coordinates) specified
+            print >>out,"%s : %s" % (username,location[0])
             locusers += 1
         tweets = ltweet(contents)
         if tweets: #l:___ found
-            print >>out,str(tweets)
+            print >>out,"%s" % tweets
             twtusers += 1
     percent = locusers/numusers         # % users with location 
     pcoord = coordusers/numusers        # % users with coordinates
