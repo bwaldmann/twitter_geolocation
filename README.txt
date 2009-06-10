@@ -5,6 +5,7 @@
 ========================================================================
 location.py
   - extracts user profile location tag from an input
+
   - usage: location.py [options]
 
     options:
@@ -14,8 +15,11 @@ location.py
         -s, --stdout            use standard output instead of file
         -o OUTPUT_FILE, --outfile=OUTPUT_FILE
                                 file to write output of location search
-  - from location import loc
-        loc(contents)           # contents: text to search
+
+  - from location import loc,ltweet
+        contents = "string to search"
+        loc(contents)           # finds user:address pair
+        ltweet(contents)        # finds instances of l:____ matches
 
 ========================================================================
 crawler.py
