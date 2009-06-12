@@ -3,13 +3,19 @@
 import sys
 import commands
 import re
+from BeautifulSoup import BeautifulSoup
 from location import loc,ltweet
 from optparse import OptionParser
 
 def main():
     (options, args) = parser.parse_args()
-    statout = commands.getstatusoutput('ls '+options.d+' > '+options.f)
-    users = open(options.f,'r')         #user listing
+    if options.f:
+        ufile = open(options.u,'w')
+        print >>ufile,options.f
+        ufile.close()
+    else:
+        statout = commands.getstatusoutput('ls '+options.d+' > '+options.u)
+    users = open(options.u,'r')         #user listing
     out = open(options.o,'w')           #output file
     if options.s: #if no output file
         out = sys.stdout #print to stdout
@@ -21,6 +27,7 @@ def main():
         numusers += 1
         user = options.d+line[0:-1] #absolute path to user page
         username = user[user.rfind('/')+1:user.rfind('.')] #isolate username
+        print username #TEMPORARY
         if options.v: #verbose option
             print >>out,"username: %s" % username
         page = open(user,'r')
@@ -40,6 +47,20 @@ def main():
         if tweets: #l:___ found
             print >>out,"%s" % tweets
             twtusers += 1
+###################
+        soup = BeautifulSoup(contents)
+        tweets = soup.findAll("span", "entry-content")
+        for tweet in tweets:
+            if ltweet(unicode(tweet.string)):
+                print "  tweet: %s" % unicode(tweet.string)
+                i = re.compile("\d+")
+                id = i.findall(tweet.parent.parent.parent['id'])
+                t = re.compile("title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
+                time = tweet.next.next.next.next.next
+                time = t.findall(unicode(time).encode('ASCII'))
+                print "    id: %s; time: %s" % (id[0],time[0])
+
+###################
     percent = locusers/numusers         # % users with location 
     pcoord = coordusers/numusers        # % users with coordinates
     plcoord = coordusers/locusers       # % locations that have coordinates
@@ -70,11 +91,18 @@ parser.add_option(                      #directory with user pages
     metavar="DIR",
     default="/project/wdim/crawlData/good_sample/",
     help="directory to find user pages in" )
-parser.add_option(                      #file for user listing
+parser.add_option(                      #one file in directory
     "-f",
     "--file",
     dest="f",
-    metavar="FILE",
+    metavar="ONLY_FILE",
+    default=False,
+    help="single file in directory to run")
+parser.add_option(                      #file for user listing
+    "-u",
+    "--ufile",
+    dest="u",
+    metavar="USER_FILE",
     default="users.txt",
     help="file to write user page names to")
 parser.add_option(                      #use stdout for output

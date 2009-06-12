@@ -5,7 +5,7 @@ import re
 from optparse import OptionParser
 
 def loc(contents):
-    a = re.compile("(?i)<span class=\"adr\">[\w, -\.:]+</span>")
+    a = re.compile("<span class=\"adr\">([\w, -\.:]+)</span>",re.I)
     loc = a.search(contents)
     coordinates = False
     if loc: #location specified
@@ -20,11 +20,9 @@ def loc(contents):
     return [location,coordinates]
 
 def ltweet(contents):
-    l = re.compile("(?i) l:\w+")
-    ltweet = l.findall(contents)
-    if not ltweet:
-        ltweet = False
-    return ltweet
+    l = re.compile("l:(\w+)",re.I)
+    tweet = l.findall(contents)
+    return tweet
 
 def main():
     (options, args) = parser.parse_args()
@@ -43,7 +41,7 @@ def main():
     print >>out,location
     tweets = ltweet(contents)
     if tweets: #tweets contain l:____ refs
-        print >>out,tweets
+        print >>out,"%s" % tweets
 
 parser = OptionParser()
 parser.add_option(                      #verbose

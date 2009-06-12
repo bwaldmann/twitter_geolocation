@@ -31,7 +31,10 @@ crawler.py
         -h, --help               show this help message and exit
         -v, --verbose            turn on verbose mode
         -d DIR, --directory=DIR  directory to find user pages in
-        -f FILE, --file=FILE     file to write user page names to
+        -f ONLY_FILE, --file=ONLY_FILE
+                                 single file in directory to run
+        -u USER_FILE, --ufile=USER_FILE
+                                 file to write user page names to
         -s, --stdout             use standard output instead of file
         -o OUTPUT_FILE, --outfile=OUTPUT_FILE
                                  file to write output of location data
