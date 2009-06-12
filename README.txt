@@ -16,10 +16,10 @@ location.py
         -o OUTPUT_FILE, --outfile=OUTPUT_FILE
                                 file to write output of location search
 
-  - from location import loc,ltweet
-        contents = "string to search"
-        loc(contents)           # returns address:coordinates pair
-        ltweet(contents)        # returns instances of l:____ matches
+  - from location import loc, ltweet
+    contents = "string to search"
+    loc(contents)               # returns address:coordinates pair
+    ltweet(contents)            # returns instances of l:____ matches
 
 ========================================================================
 crawler.py
@@ -39,3 +39,6 @@ crawler.py
         -o OUTPUT_FILE, --outfile=OUTPUT_FILE
                                  file to write output of location data
                                  extracted by crawl
+
+  - from crawler import tattrs
+    tattrs(tweet)                #returns statusID:timestamp pair

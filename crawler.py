@@ -7,6 +7,18 @@ from BeautifulSoup import BeautifulSoup
 from location import loc,ltweet
 from optparse import OptionParser
 
+def tattrs(tweet):
+#    print "  tweet: %s" % unicode(tweet.string)
+    i = re.compile("\d+")
+    id = i.findall(tweet.parent.parent.parent['id'])[0].encode('ASCII')
+    t = re.compile("title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
+    time = tweet.next.next.next.next.next
+    time = t.findall(unicode(time).encode('ASCII'))[0]
+#    print "    id: %s; time: %s" % (id,time)
+#    print [id,time]
+    return [id,time]
+    
+
 def main():
     (options, args) = parser.parse_args()
     if options.f:
@@ -47,20 +59,14 @@ def main():
         if tweets: #l:___ found
             print >>out,"%s" % tweets
             twtusers += 1
-###################
         soup = BeautifulSoup(contents)
         tweets = soup.findAll("span", "entry-content")
         for tweet in tweets:
             if ltweet(unicode(tweet.string)):
                 print "  tweet: %s" % unicode(tweet.string)
-                i = re.compile("\d+")
-                id = i.findall(tweet.parent.parent.parent['id'])
-                t = re.compile("title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
-                time = tweet.next.next.next.next.next
-                time = t.findall(unicode(time).encode('ASCII'))
-                print "    id: %s; time: %s" % (id[0],time[0])
+                pair = tattrs(tweet)
+                print "    id: %s; time: %s" % (pair[0],pair[1])
 
-###################
     percent = locusers/numusers         # % users with location 
     pcoord = coordusers/numusers        # % users with coordinates
     plcoord = coordusers/locusers       # % locations that have coordinates
