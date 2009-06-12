@@ -5,19 +5,28 @@ import commands
 import re
 from BeautifulSoup import BeautifulSoup
 from location import loc,ltweet
+import metacarta
 from optparse import OptionParser
 
 def tattrs(tweet):
-#    print "  tweet: %s" % unicode(tweet.string)
     i = re.compile("\d+")
     id = i.findall(tweet.parent.parent.parent['id'])[0].encode('ASCII')
     t = re.compile("title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
     time = tweet.next.next.next.next.next
     time = t.findall(unicode(time).encode('ASCII'))[0]
-#    print "    id: %s; time: %s" % (id,time)
-#    print [id,time]
     return [id,time]
     
+def meta(address):
+    length = 0
+    address = address
+    lf = metacarta.LocationFinder("bw1224@messiah.edu","tamuresearcher")
+    lf.method = "LocationFinder"
+#    print "method: %s" % lf.method
+    data = lf.request({'query':address})
+    length = len(data['Locations'])
+    if length > 0:
+        address = data['Locations'][0]['Paths']['Administrative']
+    return [length,address]
 
 def main():
     (options, args) = parser.parse_args()
@@ -35,6 +44,7 @@ def main():
     locusers = 0.0                      #number of users with location
     coordusers = 0.0                    #number of users with coordinates
     twtusers = 0.0                      #number of users using l:____
+    vaddr = 0.0                         #number of valid addresses
     for line in users: #for each user in listing
         numusers += 1
         user = options.d+line[0:-1] #absolute path to user page
@@ -52,9 +62,16 @@ def main():
             print >>out,"%s : %s : %s" % (username,location[0],location[1])
             locusers += 1
             coordusers += 1
+            vaddr += 1
         elif location[0]: #location (no coordinates) specified
             print >>out,"%s : %s" % (username,location[0])
+            set = meta(location[0])
+            if set[0] > 0:
+                print "  %d addresses found" % set[0]
+                print "  address: %s" % set[1]
             locusers += 1
+            if set[0] == 1:
+                vaddr += 1
         tweets = ltweet(contents)
         if tweets: #l:___ found
             print >>out,"%s" % tweets
@@ -71,10 +88,13 @@ def main():
     pcoord = coordusers/numusers        # % users with coordinates
     plcoord = coordusers/locusers       # % locations that have coordinates
     ptweet = twtusers/numusers          # % users using l:____
+    pvaddr = vaddr/locusers             # % users with valid address
     print >>out,"\n"
     print >>out,"number of users: %d" % numusers
     print >>out,"number of users with location: %d" % locusers
     print >>out,"percentage users with location: %f" % percent
+    print >>out,"number of users with valid address: %d" % vaddr
+    print >>out,"percentage location users with valid address: %f" % pvaddr
     print >>out,"number of users with coordinates: %d" % coordusers
     print >>out,"percentage users with coordinates: %f" % pcoord
     print >>out,"percentage location users with coordinates: %f" % plcoord
