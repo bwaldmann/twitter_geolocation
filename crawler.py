@@ -12,8 +12,12 @@ def tattrs(tweet):
     i = re.compile("\d+")
     id = i.findall(tweet.parent.parent.parent['id'])[0].encode('ASCII')
     t = re.compile("title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
-    time = tweet.next.next.next.next.next
-    time = t.findall(unicode(time).encode('ASCII'))[0]
+    try:
+        time = tweet.next.next.next.next.next
+        time = t.findall(unicode(time).encode('ASCII'))[0]
+    except:
+        time = tweet.next.next.next.next.next.next
+        time = t.findall(unicode(time).encode('ASCII'))[0]
     return [id,time]
     
 def meta(address):
@@ -43,6 +47,7 @@ def main():
     numusers = 0.0                      #number of users
     locusers = 0.0                      #number of users with location
     coordusers = 0.0                    #number of users with coordinates
+    twts = 0.0                          #number of tweets with l:____
     twtusers = 0.0                      #number of users using l:____
     vaddr = 0.0                         #number of valid addresses
     for line in users: #for each user in listing
@@ -51,7 +56,7 @@ def main():
         username = user[user.rfind('/')+1:user.rfind('.')] #isolate username
         print username #TEMPORARY
         if options.v: #verbose option
-            print >>out,"username: %s" % username
+            print >>out,username
         page = open(user,'r')
         contents = page.read()          #user page contents (html)
         page.close()
@@ -59,47 +64,62 @@ def main():
         if options.v: #verbose option
             print >>out,location[0]
         if location[1]: #coordinates specified
-            print >>out,"%s : %s : %s" % (username,location[0],location[1])
+            print >>out,"  %s : %s : %s" % (username,location[0],location[1])
             locusers += 1
             coordusers += 1
             vaddr += 1
         elif location[0]: #location (no coordinates) specified
-            print >>out,"%s : %s" % (username,location[0])
+            print >>out,"  %s : %s" % (username,location[0])
             set = meta(location[0])
             if set[0] > 0:
                 print "  %d addresses found" % set[0]
                 print "  address: %s" % set[1]
+                print >>out,"  %d addresses found" % set[0]
+                print >>out,"  address: %s" % set[1]
             locusers += 1
             if set[0] == 1:
                 vaddr += 1
-        tweets = ltweet(contents)
-        if tweets: #l:___ found
-            print >>out,"%s" % tweets
-            twtusers += 1
+#        tweets = ltweet(contents)
+#        if tweets: #l:___ found
+#            print >>out,"%s" % tweets
+#            twtusers += 1
         soup = BeautifulSoup(contents)
         tweets = soup.findAll("span", "entry-content")
+        twtFlag = False                     #user uses l:____ syntax
         for tweet in tweets:
             if ltweet(unicode(tweet.string)):
-                print "  tweet: %s" % unicode(tweet.string)
+                twtFlag = True
+                twts += 1
                 pair = tattrs(tweet)
-                print "    id: %s; time: %s" % (pair[0],pair[1])
+                try:
+                    print "  tweet: %s" % unicode(tweet.string)
+                    if pair[1]:
+                        print "    id: %s; time: %s" % (pair[0],pair[1])
+                        print >>out,"  tweet: %s" % unicode(tweet.string)
+                        print >>out,"    id: %s; time: %s" % (pair[0],pair[1])
+                except:
+                    print "  error parsing tweet!"
 
-    percent = locusers/numusers         # % users with location 
-    pcoord = coordusers/numusers        # % users with coordinates
-    plcoord = coordusers/locusers       # % locations that have coordinates
-    ptweet = twtusers/numusers          # % users using l:____
-    pvaddr = vaddr/locusers             # % users with valid address
-    print >>out,"\n"
-    print >>out,"number of users: %d" % numusers
-    print >>out,"number of users with location: %d" % locusers
-    print >>out,"percentage users with location: %f" % percent
-    print >>out,"number of users with valid address: %d" % vaddr
-    print >>out,"percentage location users with valid address: %f" % pvaddr
-    print >>out,"number of users with coordinates: %d" % coordusers
-    print >>out,"percentage users with coordinates: %f" % pcoord
-    print >>out,"percentage location users with coordinates: %f" % plcoord
-    print >>out,"number of users using l:____: %d" % twtusers
-    print >>out,"percentage users using l:____: %f" % ptweet
+        if twtFlag:
+            twtusers += 1
+    if not options.f:
+        percent = locusers/numusers         # % users with location 
+        pcoord = coordusers/numusers        # % users with coordinates
+        plcoord = coordusers/locusers       # % locations that have coordinates
+        ptweet = twtusers/numusers          # % users using l:____
+        pvaddr = vaddr/locusers             # % users with valid address
+        print >>out,"\n"
+        print >>out,"number of users: %d" % numusers
+        print >>out,"number of users with location: %d" % locusers
+        print >>out,"percentage users with location: %f" % percent
+        print >>out,"number of users with valid address: %d" % vaddr
+        print >>out,"percentage location users with valid address: %f" % pvaddr
+        print >>out,"number of users with coordinates: %d" % coordusers
+        print >>out,"percentage users with coordinates: %f" % pcoord
+        print >>out,"percentage location users with coordinates: %f" % plcoord
+        print >>out,"number of tweets with l:____: %d" % twts
+        print >>out,"number of users using l:____: %d" % twtusers
+        print >>out,"percentage users using l:____: %f" % ptweet
     users.close()
 
 parser = OptionParser()
