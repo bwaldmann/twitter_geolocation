@@ -9,12 +9,13 @@ location.py
   - usage: location.py [options]
 
     options:
+
         -h, --help              show this help message and exit
-        -v, --verbose           turn on verbose mode
         -f FILE, --file=FILE    input file to search
-        -s, --stdout            use standard output instead of file
         -o OUTPUT_FILE, --outfile=OUTPUT_FILE
                                 file to write output of location search
+        -s, --stdout            use standard output instead of file
+        -v, --verbose           turn on verbose mode
 
   - from location import loc, ltweet
     contents = "string to search"
@@ -28,17 +29,24 @@ crawler.py
   - usage: crawler.py [options]
 
     options:
+
         -h, --help               show this help message and exit
-        -v, --verbose            turn on verbose mode
         -d DIR, --directory=DIR  directory to find user pages in
         -f ONLY_FILE, --file=ONLY_FILE
                                  single file in directory to run
-        -u USER_FILE, --ufile=USER_FILE
-                                 file to write user page names to
-        -s, --stdout             use standard output instead of file
+        -m, --no-metacarta       do not process location information in
+	                         profile using MetaCarta
         -o OUTPUT_FILE, --outfile=OUTPUT_FILE
                                  file to write output of location data
                                  extracted by crawl
+        -s, --stdout             use standard output instead of file
+        -t, --no-tweets          do not process l:____ matches found in
+                                 user tweets
+        -u USER_FILE, --ufile=USER_FILE
+                                 file to write user page names to
+        -v, --verbose            turn on verbose mode
 
   - from crawler import tattrs
     tattrs(tweet)                #returns statusID:timestamp pair
+    meta(address)                #returns number of location matches,
+                                   #top match, error flag (for login)

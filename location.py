@@ -44,13 +44,6 @@ def main():
         print >>out,"%s" % tweets
 
 parser = OptionParser()
-parser.add_option(                      #verbose
-    "-v",
-    "--verbose",
-    action="store_true",
-    dest="v",
-    default=False,
-    help="turn on verbose mode")
 parser.add_option(                      #input file
     "-f",
     "--file",
@@ -58,13 +51,6 @@ parser.add_option(                      #input file
     default="infile.html",
     metavar="FILE",
     help="input file to search")
-parser.add_option(                      #use stdout for output
-    "-s",
-    "--stdout",
-    action="store_true",
-    dest="s",
-    default=False,
-    help="use standard output instead of output file")
 parser.add_option(                      #output file
     "-o",
     "--outfile",
@@ -72,6 +58,20 @@ parser.add_option(                      #output file
     default="lData.txt",
     metavar="OUTPUT_FILE",
     help="file to write output of location search")
+parser.add_option(                      #use stdout for output
+    "-s",
+    "--stdout",
+    action="store_true",
+    dest="s",
+    default=False,
+    help="use standard output instead of output file")
+parser.add_option(                      #verbose
+    "-v",
+    "--verbose",
+    action="store_true",
+    dest="v",
+    default=False,
+    help="turn on verbose mode")
         
 if __name__ == "__main__":
     main()
