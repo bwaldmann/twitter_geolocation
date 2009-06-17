@@ -26,6 +26,7 @@ location.py
 crawler.py
   - crawls through user pages in a given directory, using location.py 
     to extract location data
+
   - usage: crawler.py [options]
 
     options:
@@ -49,4 +50,22 @@ crawler.py
   - from crawler import tattrs
     tattrs(tweet)                #returns statusID:timestamp pair
     meta(address)                #returns number of location matches,
-                                   #top match, error flag (for login)
+                                 #  top match, error flag (for login)
+
+========================================================================
+mapUsers.py
+  - crawls through data output from crawler.py and generates HTML and
+    PHP files to display a map of users using the Google Map API
+
+  - usage: mapUsers.py [options]
+
+      -h, --help                 show this help message and exit
+      -d DIR, --directory=DIR    directory to find user data in
+      -f FILE, --file=FILE       single file in directory to run
+      -m FILE, --mapfile=FILE    file to write map content to
+      -s, --stdout               use standard output instead of output
+                                 file
+      -t FILE, --topfile=FILE    file to write opening html tags and
+                                 javascript to
+      -u FILE, --ufile=FILE      file to write user data names to
+      -v, --verbose              turn on verbose mode
