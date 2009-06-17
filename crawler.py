@@ -24,6 +24,8 @@ def meta(address):
     length = 0
     address = address
     error = False
+    lat = False
+    lon = False
     lf = metacarta.LocationFinder("bw1224@messiah.edu","tamuresearcher")
     lf.method = "LocationFinder"
 #    print "method: %s" % lf.method
@@ -32,12 +34,15 @@ def meta(address):
         length = len(data['Locations'])
         if length > 0:
             address = data['Locations'][0]['Paths']['Administrative']
+            lat = data['Locations'][0]['Centroid']['Latitude']
+            lon = data['Locations'][0]['Centroid']['Longitude']
     except:
         print "  error in query login!"
         error = True
-    return [length,address,error]
+    return [length,address,lat,lon,error]
 
 def main():
+    tmp = "tmp/";
     (options, args) = parser.parse_args()
     if options.f:
         ufile = open(options.u,'w')
@@ -60,6 +65,7 @@ def main():
         numusers += 1
         user = options.d+line[0:-1] #absolute path to user page
         username = user[user.rfind('/')+1:user.rfind('.')] #isolate username
+        file = open("%s%s.txt" % (tmp,username),'w')
         print username #TEMPORARY
         if options.v: #verbose option
             print >>out,username
@@ -71,6 +77,8 @@ def main():
             print >>out,location[0]
         if location[1]: #coordinates specified
             print >>out,"%s : %s : %s" % (username,location[0],location[1])
+            lat,lon = location[1].split(',')
+            print >>file,"%s$xyzzy$%s$xyzzy$%s" % (location[0],lat,lon)
             locusers += 1
             coordusers += 1
             vaddr += 1
@@ -78,7 +86,7 @@ def main():
             print >>out,"%s : %s" % (username,location[0])
             if options.m:
                 set = meta(location[0])
-                if set[2]:
+                if set[4]:
                     print >>out,"  error in query login!"
                     login += 1
                 if set[0] > 0:
@@ -86,15 +94,19 @@ def main():
                     print "  address: %s" % set[1]
                     print >>out,"  %d addresses found" % set[0]
                     print >>out,"  address: %s" % set[1]
+                    print >>file,"%s$xyzzy$%s$xyzzy$%s" % (location[0],set[2],set[3])
                 if set[0] == 1:
                     vaddr += 1
             locusers += 1
+        else: #no location specified
+            print >>file,"$xyzzy$$xyzzy$"
         if options.t:
             soup = BeautifulSoup(contents)
             tweets = soup.findAll("span", "entry-content")
             twtFlag = False                     #user uses l:____ syntax
             for tweet in tweets:
-                if ltweet(unicode(tweet.string)):
+                lcol = ltweet(unicode(tweet.string).encode('ASCII','replace'))
+                if lcol:
                     twtFlag = True
                     twts += 1
                     pair = tattrs(tweet)
@@ -104,6 +116,7 @@ def main():
                             print "    id: %s; time: %s" % (pair[0],pair[1])
                             print >>out,"  tweet: %s" % unicode(tweet.string)
                             print >>out,"    id: %s; time: %s" % (pair[0],pair[1])
+                            print >>file,"%s$xyzzy$%s$xyzzy$%s" % (lcol[0],pair[0],pair[1])
                     except:
                         print "  error parsing tweet!"
             if twtFlag:
