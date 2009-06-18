@@ -3,64 +3,23 @@
 from optparse import OptionParser
 import commands
 
-def startT(file,cLat,cLon):
-    print >>file,"<html>"
-    print >>file,"  <head>"
-    print >>file,"    <link href=\"default.css\" rel=\"stylesheet\" type=\"text/css\" />"
-    print >>file,"    <title>Bethany Waldmann | CSE@TAMU REU</title>\n"
-    print >>file,"    <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\" />"
-    print >>file,"    <script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=false\"></script>"
-    print >>file,"    <script type=\"text/javascript\">"
-    print >>file,"      function initialize() {"
-    print >>file,"          var coord0 = new google.maps.LatLng(%s,%s);" % (cLat,cLon)
-    print >>file,"          var myOptions = {"
-    print >>file,"              zoom: 2,"
-    print >>file,"              center: coord0,"
-    print >>file,"              mapTypeId: google.maps.MapTypeId.TERRAIN,"
-    print >>file,"          };"
-    print >>file,"          var map = new google.maps.Map(document.getElementById(\"map_canvas\"), myOptions);\n"
+def startT(cLat,cLon):
+    cLat,cLon
 
-def userT(file,num,username,lat,lon):
-    print >>file,"          var coord%d = new google.maps.LatLng(%s,%s);" % (num,lat,lon)
-    print >>file,"          var marker%d = new google.maps.Marker({" % num
-    print >>file,"              position: coord%d," % num
-    print >>file,"              map: map,"
-    print >>file,"              title:\"%s\"});\n" % username
-
-def endT(file):
-    print >>file,"      }"
-    print >>file,"    </script>\n"
-    print >>file,"  </head>\n"
-    print >>file,"  <body onload=\"initialize()\">"
-    print >>file,"    <div id=\"container\">\n"
-    print >>file,"    <div id=\"Header\">"
-    print >>file,"        <h3><a href=\"index.php\">Bethany Waldmann</a> | CSE@TAMU REU 2009</h3>"
-    print >>file,"    </div>\n"
-    print >>file,"    <div id=\"Menu\">"
-    print >>file,"        <a href=\"index.php\">Home</a><br>"
-    print >>file,"        <a href=\"aboutme.php\">About Me</a><br>"
-    print >>file,"        <a href=\"mymentors.php\">My Mentors</a><br>"
-    print >>file,"        <a href=\"research.php\">Research</a><br>"
-    print >>file,"        <a href=\"journal.php\">Journal</a><br>"
-    print >>file,"        <a href=\"resources.php\">Resources</a><br>"
-    print >>file,"        <a href=\"maps.php\">Maps</a><br>"
-    print >>file,"    </div>\n"
-    print >>file,"    <div id=\"Content\">"
+def userT(num,username,lat,lon):
+    num,lat,lon,num,num,username
 
 def writeM(file,title):
-    print >>file,"<?php include(\"topM.html\"); ?>\n"
-    print >>file,"        <div id=\"entry\">"
-    print >>file,"            <h4>%s</h4>" % title
-    print >>file,"            <div id=\"map_canvas\" style=\"width:100%; height:75%\"></div>"
-    print >>file,"        </div>\n"
-    print >>file,"<?php include(\"bottom.html\"); ?>"
+    title
 
 def main():
     (options,args) = parser.parse_args()
     mfile = open(options.m,'w')         #map file
-    writeM(mfile,"Twitter Users")
-    tfile = open(options.t,'w')         #top file
-    startT(tfile,38,-27)
+    print >>mfile,open(options.input1).read() % ("Twitter Users")
+    print >>mfile,open(options.input2).read()
+    sfile = open(options.script,'w')    #script file
+    initialize = open(options.initialize,'r').read()
+    print >>sfile,initialize % (38,-27)
     if options.f:
         ufile = open(options.u,'w')
         print >>ufile,options.f
@@ -83,35 +42,65 @@ def main():
             lon = lon[:-1]
             print "  lat: %s; lon: %s" % (lat,lon)
             if lat and lon and num<37:
-                userT(tfile,num,username,lat,lon)
+                marker = open(options.marker).read()
+                print >>sfile, marker % (num,lat,lon,num,num,username)
                 num += 1
         except:
             print "  error unpacking location"
-
-    endT(tfile)
+    print >>sfile,open(options.close,'r').read()
 
 parser = OptionParser()
+parser.add_option(                      #script closure file
+    "--close",
+    dest="close",
+    metavar="FILE",
+    default="close.html",
+    help="file to read script closure from")
 parser.add_option(                      #directory with user data
     "-d",
     "--directory",
     dest="d",
     metavar="DIR",
     default="tmp/",
-    help="directory to find user data in" )
+    help="directory to find user data in")
 parser.add_option(                      #one file in directory
     "-f",
     "--file",
     dest="f",
-    metavar="ONLY_FILE",
+    metavar="FILE",
     default=False,
     help="single file in directory to run")
+parser.add_option(                      #script initialization file
+    "--initialize",
+    dest="initialize",
+    metavar="FILE",
+    default="initialize.html",
+    help="file to read script initialization from")
+parser.add_option(                      #beginning of maps.php input file
+    "--input1",
+    dest="input1",
+    metavar="FILE",
+    default="input1.html",
+    help="file to read beginning of maps.php from")
+parser.add_option(                      #end of maps.php input file
+    "--input2",
+    dest="input2",
+    metavar="FILE",
+    default="input2.html",
+    help="file to read end of maps.php from")
 parser.add_option(                      #map file
     "-m",
     "--mapfile",
     dest="m",
-    metavar="MAP_FILE",
+    metavar="FILE",
     default="maps.php",
     help="file to write map content to")
+parser.add_option(                      #marker input file
+    "--marker",
+    dest="marker",
+    metavar="FILE",
+    default="marker.html",
+    help="file to read marker section of script from")
 parser.add_option(                      #use stdout for output
     "-s",
     "--stdout",
@@ -120,12 +109,11 @@ parser.add_option(                      #use stdout for output
     default=False,
     help="use standard output instead of output file")
 parser.add_option(                      #top file
-    "-t",
-    "--topfile",
-    dest="t",
-    metavar="TOP_FILE",
-    default="topM.html",
-    help="file to write opening html tags and javascript to")
+    "--script",
+    dest="script",
+    metavar="FILE",
+    default="script.html",
+    help="file to write javascript to")
 parser.add_option(                      #file for user listing
    "-u",
     "--ufile",
