@@ -2,6 +2,7 @@
 
 from optparse import OptionParser
 import commands
+from cluster import kmeans
 
 def startT(cLat,cLon):
     cLat,cLon
@@ -27,6 +28,7 @@ def main():
     else:
         statout = commands.getstatusoutput("ls %s > %s" % (options.d,options.u))
     users = open(options.u,'r')         #user listing
+    points = []
     num = 1
     for line in users: #for each user in listing
         user = options.d+line[0:-1] #absolute path to user data
@@ -40,13 +42,26 @@ def main():
         try:
             add,lat,lon = line1.split('$xyzzy$')
             lon = lon[:-1]
-            print "  lat: %s; lon: %s" % (lat,lon)
-            if lat and lon and num<37:
-                marker = open(options.marker).read()
-                print >>sfile, marker % (num,lat,lon,num,num,username)
-                num += 1
+            if lat and lon:
+                points.append([username,lat,lon])
+#            print "  lat: %s; lon: %s" % (lat,lon)
+#            if lat and lon and num<37:
+#                marker = open(options.marker).read()
+#                print >>sfile, marker % (num,lat,lon,num,num,username)
+#                num += 1
         except:
             print "  error unpacking location"
+#    print "points: %s" % points
+    markers = kmeans(points,50,200)     #clusters of users
+    print "markers: %s" % markers
+    i = 0                               #counter
+    for m in markers:
+        num = m[0]                      #number of members in cluster
+        lat = m[1][0]                   #latitude of cluster mean
+        lon = m[1][1]                   #longitude of cluster mean
+        marker = open(options.marker).read()
+        print >>sfile,marker % (i,lat,lon,i,i,num)
+        i += 1
     print >>sfile,open(options.close,'r').read()
 
 parser = OptionParser()
