@@ -69,3 +69,20 @@ mapUsers.py
                                  javascript to
       -u FILE, --ufile=FILE      file to write user data names to
       -v, --verbose              turn on verbose mode
+
+========================================================================
+BeautifulSoup.py
+  - parses HTML and XML tags
+
+========================================================================
+cluster.py
+  - does a k-means algorithm
+
+========================================================================
+metacarta.py
+  - provides access to MetaCarta's web services
+  - DEPENDENCY: simplejson
+
+========================================================================
+sphereDist.py
+  - calculates distances on a spherical surface
