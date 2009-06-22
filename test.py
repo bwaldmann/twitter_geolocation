@@ -23,14 +23,17 @@ def childProc(num):
     sys.exit()
 
 
-def watch_the_children(proc): 
-    while len(proc)>=MAX_PROCS: #10 child processes running
+def watch_the_children(proc, waitForAll=False):
+    while len(proc)>=MAX_PROCS or waitForAll:
         for c in proc:
             if not is_running(c):
                 print "  child process done: %d" % c
                 proc.remove(c)
-        print "SLEEPING %d processes running - waiting..." % len(proc)
-        sleep(3) #wait 3 seconds
+                if waitForAll and not proc: waitForAll = False
+        if proc:
+            # only sleep if we processes to wait for
+            print "SLEEPING %d processes running - waiting..." % len(proc)
+            sleep(3) #wait 3 seconds
 
 
 def main():
@@ -44,7 +47,7 @@ def main():
             watch_the_children(proc)
         else:
             childProc(num)
-
+    watch_the_children(proc, True)
 
 if __name__ == "__main__":
     main()
