@@ -3,10 +3,12 @@
 import sys
 import commands
 import re
+from os import mkdir
 from BeautifulSoup import BeautifulSoup
 from location import loc,ltweet
 import metacarta
 from optparse import OptionParser
+from datetime import date,datetime
 
 def tattrs(tweet):
     i = re.compile("\d+")
@@ -42,7 +44,12 @@ def meta(address):
     return [length,address,lat,lon,error]
 
 def main():
-    tmp = "tmp/";
+    ts = 'T'.join(str(datetime.now()).split(' '))
+    ts = '-'.join(ts.split(':'))
+    ts = ts[:ts.rfind('.')]
+    print ts
+    tmp = "data/%s/" % ts
+    mkdir(tmp)
     (options, args) = parser.parse_args()
     if options.f:
         ufile = open(options.u,'w')
@@ -78,7 +85,7 @@ def main():
         if location[1]: #coordinates specified
             print >>out,"%s : %s : %s" % (username,location[0],location[1])
             lat,lon = location[1].split(',')
-            print >>file,"%s$xyzzy$%s$xyzzy$%s" % (location[0],lat,lon)
+            print >>file,"%s$xyzzy$%s$xyzzy$%s$xyzzy$%s" % (location[0],lat,lon,date.today())
             locusers += 1
             coordusers += 1
             vaddr += 1
@@ -86,15 +93,17 @@ def main():
             print >>out,"%s : %s" % (username,location[0])
             if options.m:
                 set = meta(location[0])
-                if set[4]:
+                if set[4]: #login error
                     print >>out,"  error in query login!"
                     login += 1
-                if set[0] > 0:
+                if set[0] > 0: #address(es) found
                     print "  %d addresses found" % set[0]
                     print "  address: %s" % set[1]
                     print >>out,"  %d addresses found" % set[0]
                     print >>out,"  address: %s" % set[1]
-                    print >>file,"%s$xyzzy$%s$xyzzy$%s" % (location[0],set[2],set[3])
+                    print >>file,"%s$xyzzy$%s$xyzzy$%s$xyzzy$%s" % (location[0],set[2],set[3],date.today())
+                else: #no address found
+                    print >>file,"$xyzzy$$xyzzy$$xyzzy$"
                 if set[0] == 1:
                     vaddr += 1
             locusers += 1
