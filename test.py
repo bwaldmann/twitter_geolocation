@@ -14,32 +14,38 @@ def is_running(pid):
     except:
         return 0
 
+def childProc(num):
+    print "*in %d*" % num
+    sleep(10)
+    print "*done %d*" % num
+
 def main():
     log = open("test.log",'w')
     tmp = range(20)
     print tmp
     proc = []                           #child processes (current)
-    for item in tmp: #for each user in listing
+    for num in tmp: #for each number 0-19
         cpid = fork()
+        if not cpid:
+            childProc(num)
+            sys.exit()
         if cpid: #parent process
-            print >>log,"starting child process: %d" % cpid
+            print "starting child process: %d" % cpid
             proc.append(cpid)
             while len(proc)>=10: #10 child processes running
-                print >>log,"checking child processes"
-                print >>log,"  %s" % proc
+                print "checking child processes"
+                print "  %s" % proc
                 for c in proc:
-                    print >>log,"  checking %d... %s" % (c,is_running(c))
+                    print "  checking %d... %s" % (c,is_running(c))
                     if not is_running(c):
-                        print >>log,"  child process done: %d" % c
+                        print "  child process done: %d" % c
                         proc.remove(c)
-                print >>log,"%d processes running - waiting..." % len(proc)
+                print "%d processes running - waiting..." % len(proc)
                 sleep(3) #wait 3 seconds
             continue
-        #child process
-        print >>log,"*in %d*" % item
-        sleep(10)
-        print >>log,"*done %d*" % item
-        kill(getpid(),signal.SIG_DFL)
+
+
+
 
 if __name__ == "__main__":
     main()
