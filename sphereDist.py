@@ -3,6 +3,16 @@
 import sys
 from math import pi, sin, cos, acos
 
+#r = 3959      # radius of earth (mi)
+#c = 69.046767 # miles/degree
+
+def dist_on_earth(coord1,coord2):
+    lat1 = coord1[0]
+    lon1 = coord1[1]
+    lat2 = coord2[0]
+    lon2 = coord2[1]
+#    print "  [%f,%f], [%f,%f]" % (lat1,lon1,lat2,lon2)
+    return distance_on_unit_sphere(lat1,lon1,lat2,lon2)/5280
 
 def distance_on_unit_sphere(lat1, long1, lat2, long2):
 
