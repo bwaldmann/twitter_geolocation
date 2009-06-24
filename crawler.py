@@ -10,16 +10,13 @@ import metacarta
 from optparse import OptionParser
 from datetime import date,datetime
 
-def tattrs(tweet):
-    i = re.compile("\d+")
-    id = i.findall(tweet.parent.parent.parent['id'])[0].encode('ASCII')
-    t = re.compile("title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
-    try:
-        time = tweet.next.next.next.next.next
-        time = t.findall(unicode(time).encode('ASCII'))[0]
-    except:
-        time = tweet.next.next.next.next.next.next
-        time = t.findall(unicode(time).encode('ASCII'))[0]
+def tattrs(contents,i):
+    t = re.compile("<span class=\"published\" title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})",re.I)
+    start = contents[:i.start()].rfind("status_")+7
+    end = contents[start:i.start()].find('\"')
+    print "  start: %d; end: %d" % (start,end)
+    id = contents[start:start+end]
+    time = t.search(contents[i.end():]).group(1)
     return [id,time]
     
 def meta(address):
@@ -48,8 +45,8 @@ def main():
     ts = '-'.join(ts.split(':'))
     ts = ts[:ts.rfind('.')]
     print ts
-    tmp = "data/%s/" % ts
-    mkdir(tmp)
+    dir = "data/%s/" % ts
+    mkdir(dir)
     (options, args) = parser.parse_args()
     if options.f:
         ufile = open(options.u,'w')
@@ -58,7 +55,7 @@ def main():
     else:
         statout = commands.getstatusoutput('ls '+options.d+' > '+options.u)
     users = open(options.u,'r')         #user listing
-    out = open(options.o,'w')           #output file
+    out = open(dir+options.o,'w') #output file
     if options.s: #if no output file
         out = sys.stdout #print to stdout
     numusers = 0.0                      #number of users
@@ -72,7 +69,7 @@ def main():
         numusers += 1
         user = options.d+line[0:-1] #absolute path to user page
         username = user[user.rfind('/')+1:user.rfind('.')] #isolate username
-        file = open("%s%s.txt" % (tmp,username),'w')
+        file = open("%s%s.txt" % (dir,username),'w')
         print username #TEMPORARY
         if options.v: #verbose option
             print >>out,username
@@ -110,24 +107,25 @@ def main():
         else: #no location specified
             print >>file,"$xyzzy$$xyzzy$"
         if options.t:
-            soup = BeautifulSoup(contents)
-            tweets = soup.findAll("span", "entry-content")
-            twtFlag = False                     #user uses l:____ syntax
-            for tweet in tweets:
-                lcol = ltweet(unicode(tweet.string).encode('ASCII','replace'))
+            t = re.compile("<span class=\"entry-content\">(.+?)</span>",re.I)
+            s = re.compile("<span class=\"published\" title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})",re.I)
+            iter = t.finditer(contents)
+            for i in iter:
+                twtFlag = False                     #user uses l:____ syntax
+                twt = i.group(1)
+                lcol = ltweet(twt)
                 if lcol:
                     twtFlag = True
                     twts += 1
-                    pair = tattrs(tweet)
-                    try:
-                        print "  tweet: %s" % unicode(tweet.string)
-                        if pair[1]:
-                            print "    id: %s; time: %s" % (pair[0],pair[1])
-                            print >>out,"  tweet: %s" % unicode(tweet.string)
-                            print >>out,"    id: %s; time: %s" % (pair[0],pair[1])
-                            print >>file,"%s$xyzzy$%s$xyzzy$%s" % (lcol[0],pair[0],pair[1])
-                    except:
-                        print "  error parsing tweet!"
+                    id,time = tattrs(contents,i)
+                    print "  %s" % twt
+#                    try:
+                    print "    id: %s; time: %s" % (id,time)
+                    print >>out,"  tweet: %s" % twt
+                    print >>out,"    id: %s; time: %s" % (id,time)
+                    print >>file,"%s$xyzzy$%s$xyzzy$%s" % (lcol[0],id,time)
+#                    except:
+#                        print "  error parsing tweet!"
             if twtFlag:
                 twtusers += 1
 
