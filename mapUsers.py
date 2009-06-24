@@ -52,16 +52,17 @@ def main():
         except:
             print "  error unpacking location"
 #    print "points: %s" % points
-    markers = kmeans(points,50,200)     #clusters of users
+    markers = kmeans(points,50,100)     #clusters of users
     print "markers: %s" % markers
     i = 0                               #counter
     for m in markers:
         num = m[0]                      #number of members in cluster
         lat = m[1][0]                   #latitude of cluster mean
         lon = m[1][1]                   #longitude of cluster mean
-        marker = open(options.marker).read()
-        print >>sfile,marker % (i,lat,lon,i,i,num)
-        i += 1
+        if num>0: #cluster contains 1 or more users
+            marker = open(options.marker).read()
+            print >>sfile,marker % (i,lat,lon,i,i,num)
+            i += 1
     print >>sfile,open(options.close,'r').read()
 
 parser = OptionParser()
@@ -76,7 +77,7 @@ parser.add_option(                      #directory with user data
     "--directory",
     dest="d",
     metavar="DIR",
-    default="tmp/",
+    default="data/2009-06-22T09-20-23")
     help="directory to find user data in")
 parser.add_option(                      #one file in directory
     "-f",

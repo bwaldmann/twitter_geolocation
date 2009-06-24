@@ -39,7 +39,10 @@ def distance_on_unit_sphere(lat1, long1, lat2, long2):
     # distance = rho * arc length
     cosv = (sin(phi1)*sin(phi2)*cos(theta1 - theta2) +
            cos(phi1)*cos(phi2))
-    arc = acos( cosv )
+    try:
+        arc = acos( cosv )
+    except:
+        arc = 2*pi
 
     # Remember to multiply arc by the radius of the earth 
     # in your favorite set of units to get length.
