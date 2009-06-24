@@ -4,14 +4,6 @@ from optparse import OptionParser
 import commands
 from cluster import kmeans
 
-def startT(cLat,cLon):
-    cLat,cLon
-
-def userT(num,username,lat,lon):
-    num,lat,lon,num,num,username
-
-def writeM(file,title):
-    title
 
 def main():
     (options,args) = parser.parse_args()
@@ -39,8 +31,9 @@ def main():
             print username
         data = open(user,'r')           #user data file
         line1 = data.readline()
+        print line1
         try:
-            add,lat,lon = line1.split('$xyzzy$')
+            add,lat,lon,ts = line1.split('$xyzzy$')
             lon = lon[:-1]
             if lat and lon:
                 points.append([username,lat,lon])
@@ -77,7 +70,7 @@ parser.add_option(                      #directory with user data
     "--directory",
     dest="d",
     metavar="DIR",
-    default="data/2009-06-22T09-20-23")
+    default="data/2009-06-24T15-24-42/",
     help="directory to find user data in")
 parser.add_option(                      #one file in directory
     "-f",
