@@ -103,6 +103,8 @@ def main():
                     print >>file,"$xyzzy$$xyzzy$$xyzzy$"
                 if set[0] == 1:
                     vaddr += 1
+            else:
+                print >>file,"%s$xyzzy$$xyzzy$$xyzzy$%s" % (location[0],date.today())
             locusers += 1
         else: #no location specified
             print >>file,"$xyzzy$$xyzzy$"
