@@ -40,6 +40,7 @@ def findTweets(contents):
             print "TWEET PARSED! id: %s; twt: %s; time: %s" % (id,twt,time)
             tweets.append([id,twt,time])
             m = end2
+            print "m: %d" % m
         except:
             break
     return tweets
