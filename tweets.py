@@ -12,16 +12,16 @@ from codes import codeReg, find_airport_code
 def findTweets(contents):
     tweets = []
     m = 0
-    while(True):
+    while True:
         try:
-            print contents[m:]
+            print "CCC %s" % contents[m:]
             start1 = contents[m:].find("status_")
             if start1 == -1:
                 print "error finding id"
                 break
-            start1 += m + 7
+            start1 += m + 7 # len("status_") = 7
             end1 = start1+contents[start1:].find('\"')
-            print "%s; %s" % (start1,end1)
+            print "startID: %s; endID: %s" % (start1,end1)
             id = contents[start1:end1]
             print "id: %s" % id
             start2 = contents[end1:].find("<span class=\"entry-content\">")
@@ -30,14 +30,14 @@ def findTweets(contents):
                 break
             start2 += m + end1 + 28
             end2 = start2+contents[start2:].find("</span><span entry=\"meta entry-meta\">")
-            print "%s; %s" % (start2,end2)
+            print "startTwt: %s; endTwt: %s" % (start2,end2)
             twt = contents[start2:end2]
             print "tweet: %s" % twt
             t = re.compile("<span class=\"published\" title=\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})",re.I)
             c = contents[end2:]
-            print c
+            print "what we have to work with for timestamp: %s" % c
             time = t.search(c).group(1)
-            print "%s; %s; %s" % (id,twt,time)
+            print "TWEET PARSED! id: %s; twt: %s; time: %s" % (id,twt,time)
             tweets.append([id,twt,time])
             m = end2
         except:
