@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from sys import argv
+from os import mkdir
 from urllib import urlopen
 import simplejson as json
 from location import loc
@@ -8,57 +9,63 @@ import metacarta
 import commands
 
 
-def userLoc(username):
-    dir = "data/addresses/"
-    local = False #user profile stored in file
-    file = False #user profile stored locally
-    web = False #user profile found on web
+def userLoc(username,ts):
+    dir = "data/addresses/" #local directory
+    local = False           #location found locally
+    file = False            #location found in file
+    web = False             #location found on web
+    adr = False             #location given in user profile
+    coords = False          #coordinates given in user profile
+    lat = False             #latitude of user
+    lon = False             #longitude of user
+    path = False            #path obtained from MetaCarta
+    #### ATTEMPT LOCAL RETRIEVAL ####
     try:
-        username = username.lower()
-        lfile = open("%s%s.txt"%(dir,username[0]),'r')
-        contents = lfile.read()[:-2]
+        lfile = open("%s%s/%s.loc"%(dir,username[0].lower(),username),'r')
+        contents = lfile.read()[:-1]
+        adr,lat,lon,path,ts = contents.split("$xyzzy$")
         lfile.close()
-        d = json.loads("{%s}"%contents)
-        adr,lat,lon,meta = d[username]
-        adr = adr.encode("ascii","replace") #convert from unicode
         local = True        
     except:
-        print "user location not stored locally"
-    if not local:
-        dir = "/project/wdim/crawlData/20_tweet_public_timeline/Updates/"
-        try:
-            ufile = open("%s%s.html" % (dir,username),'r')
-            contents = ufile.read()
-            adr,coords = loc(contents)
-        except:
-            print "user location not stored in project/wdim/crawlData/"
+        local = False
+    #### ATTEMPT FILE RETRIEVAL ####
+#    if not local:
+#        d = "/project/wdim/crawlData/20_tweet_public_timeline/Updates/"
+#        try:
+#            ufile = open("%s%s.html" % (d,username),'r')
+#            contents = ufile.read()
+#            adr,coords = loc(contents)
+#            file = True
+#        except:
+#            file = False
+#    #### GET FROM WEB ####
     if not file:
-        web = True
         url = "http://www.twitter.com/%s" % username
-        page = urlopen(url)
-        html = page.read()
-        meta = "false"
-        adr, coords = loc(html)
+        try:
+            page = urlopen(url)
+            html = page.read()
+            adr, coords = loc(html)
+            web = True
+        except:
+            print "  error accessing webpage"
+            efile = open("spatial.err",'a')
+            print >>efile,username
+            efile.close()
+    #### IF NOT LOCAL, MAKE LOCAL ####
     if file or web:
-        if adr == False: #no location given
-            lat = "false"
-            lon = "false"
-        elif coords: #coordinates given
+        if coords: #coordinates given
             lat = coords[0]
             lon = coords[1]
         else: #location given, but not coordinates
-            meta = "true"
-            leng,path,cent,box,pop = findLoc(adr)
-            if leng > 0:
-                lat = cent["Latitude"]
-                lon = cent["Longitude"]
-            else:
-                lat = "false"
-                lon = "false"
-        lfile = open("%s%s.txt"%(dir,username[0]),'a')
-        uline = "\"%s\":[\"%s\",%s,%s,%s],\n"
-        lfile.write(uline % (username,adr,lat,lon,meta))
-    return [adr,lat,lon,meta]
+            if adr != False:
+                leng,path,cent,box,pop = findLoc(adr)
+                if leng > 0:
+                    lat = cent["Latitude"]
+                    lon = cent["Longitude"]
+        lfile = open("%s%s/%s.loc"%(dir,username[0].lower(),username),'w')
+        uline = "%s$xyzzy$%s$xyzzy$%s$xyzzy$%s$xyzzy$%s\n"
+        lfile.write(uline % (adr,lat,lon,path,ts))
+    return [adr,lat,lon,path,ts]
 
 
 def findLoc(adr):
