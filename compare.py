@@ -3,15 +3,16 @@
 import commands
 from sys import argv, stdin, stdout, exit
 from meta import locationfinder
-from sphericalDist import dist_on_earth
+from sphereDist import dist_on_earth
 
 
 def getCities(dir,num,txt):
-    stat,out = commands.getstatusoutput("ls %s | grep %s.*" % (dir,txt))
+    statout = commands.getstatusoutput("ls %s | grep %s* > tmp.places" % (dir,txt))
+    pfile = open("tmp.places",'r')
     count = 1
     selections = []
-    for line in out:
-        selections.append[count,line[:-1]]
+    for place in pfile:
+        selections.append([count,place[:place.rfind('.')]])
         count += 1
     print "count: %d" % count
     print "city %d options:" % num
@@ -22,7 +23,7 @@ def getCities(dir,num,txt):
     cref = int(stdin.readline())
     if cref == count:
         exit()
-    city = selections[cref][1]
+    city = selections[cref-1][1]
     return city
 
 
@@ -45,7 +46,7 @@ def getCityInfo(txt):
         pop = loc["Population"]
         type = data["Types"][loc["Type"]]["ShortDescription"]
         file = open("%s.info",'w')
-        print >>file,"%s$xyzzy$%s$xyzzy$%s$xyzzy$s" % (pop,cent,type,box)
+        print >>file,"%s$xyzzy$%s$xyzzy$%s$xyzzy$%s" % (pop,cent,type,box)
         file.close()
     return pop,cent,type,box
 
@@ -61,8 +62,7 @@ def parseCityInfo(dir,num,txt):
 
 def getResidents(dir,city):
     residents = []
-    file = open("%s/%s.path"%(dir,city))
-    file = file.read()
+    file = open("%s/%s.residents"%(dir,city))
     for line in file:
         residents.append(line[:-1])
     return residents
@@ -71,7 +71,7 @@ def getResidents(dir,city):
 def getContacts(dir,residents):
     contacts = []
     for resident in residents:
-        rfile = open("%s/%s.fromto"%(dir,resident),'r')
+        rfile = open("%s/%s/%s.fromto"%(dir,resident[0].lower(),resident),'r')
         for contact in rfile:
             contact = contact.split(' ')[1]
             contacts.append(contact)
@@ -79,24 +79,25 @@ def getContacts(dir,residents):
     contacts = set(contacts)
     return contacts
 
-def write_to_csv(cityA,cityB,popA,popB,sampA,sampB,contactsA,contactsB,AtoB,BtoA,dist)
-    csvFile = open("%s-TO-%s.csv",'w')
-    print >>csvFile,",%s,%s,Contacts,A to B,B to A" % (cityA,cityB)
-    print >>csvFile,"Population,%d,%d,,," % (popA,popB)
-    print >>csvFile,"Sample,%d,%d,%d,%d,%d" % (sampa,sampB,AtoB,BtoA)
-    print >>csvFile,"Contacts,%d,%d,,," % (contactsA,contactsB)
-    print >>csvfile,",,,,,"
-    print >>csvfile,"Distance,%d" % dist
+def write_to_csv(dir,cityA,cityB,popA,popB,sampA,sampB,contactsA,contactsB,AtoB,BtoA,dist):
+    csvFile = open("%s/%s-TO-%s.csv"%(dir,cityA,cityB),'w')
+    print >>csvFile,",%s (A),%s (B),A to B,B to A" % (cityA,cityB)
+    print >>csvFile,"Population,%d,%d,," % (popA,popB)
+    print >>csvFile,"Sample,%d,%d,%d,%d" % (sampA,sampB,AtoB,BtoA)
+    print >>csvFile,"Contacts,%d,%d,," % (contactsA,contactsB)
+    print >>csvFile,",,,,"
+    print >>csvFile,"Distance,%d" % dist
     csvFile.close()
 
 
 def main():
-    dir1 = "data/addresses"
+    dir1 = "data/paths"
     dir2 = "/local/dc/data/fromto"
+    dir3 = "data/interaction"
     cityA,popA,latA,lonA = parseCityInfo(dir1,1,argv[1])
     cityB,popB,latB,lonB = parseCityInfo(dir1,2,argv[2])
-    residentsA = getResidents(dir2,cityA)
-    residentsB = getResidents(dir2,cityB)
+    residentsA = getResidents(dir1,cityA)
+    residentsB = getResidents(dir1,cityB)
     sampA = len(residentsA)
     sampB = len(residentsB)
     contactsA = getContacts(dir2,residentsA)
@@ -104,7 +105,7 @@ def main():
     fromAtoB = len(contactsA & set(residentsB))
     fromBtoA = len(contactsB & set(residentsA))
     dist = dist_on_earth([latA,lonA],[latB,lonB])
-    write_to_csv(popA,popB,sampA,sampB,len(contactsA),len(contactsB),fromAtoB,fromBtoA,dist)
+    write_to_csv(dir3,cityA,cityB,popA,popB,sampA,sampB,len(contactsA),len(contactsB),fromAtoB,fromBtoA,dist)
 
 
 if __name__ == "__main__":
