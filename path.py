@@ -39,7 +39,7 @@ def main():
                     print >>ofile,username
                     ofile.close()
                 else:
-                    if adr != False:
+                    if adr != "False":
                         ofile = open("%s/nometa.list" % dir2,'a')
                         print >>ofile,"%s$xyzzy$%s" % (username,adr)
                         ofile.close()

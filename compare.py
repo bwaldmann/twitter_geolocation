@@ -82,7 +82,10 @@ def getContacts(dir,residents):
 def write_to_csv(dir,cityA,cityB,popA,popB,sampA,sampB,contactsA,contactsB,AtoB,BtoA,dist):
     csvFile = open("%s/%s-TO-%s.csv"%(dir,cityA,cityB),'w')
     print >>csvFile,",%s (A),%s (B),A to B,B to A" % (cityA,cityB)
-    print >>csvFile,"Population,%d,%d,," % (popA,popB)
+    try:
+        print >>csvFile,"Population,%d,%d,," % (popA,popB)
+    except:
+        print >>csvFile,"Population,%s,%s,," % (popA,popB)
     print >>csvFile,"Sample,%d,%d,%d,%d" % (sampA,sampB,AtoB,BtoA)
     print >>csvFile,"Contacts,%d,%d,," % (contactsA,contactsB)
     print >>csvFile,",,,,"
@@ -91,7 +94,7 @@ def write_to_csv(dir,cityA,cityB,popA,popB,sampA,sampB,contactsA,contactsB,AtoB,
 
 
 def main():
-    dir1 = "data/paths"
+    dir1 = "/project/wdim/geosocial/paths/residents"
     dir2 = "/local/dc/data/fromto"
     dir3 = "data/interaction"
     cityA,popA,latA,lonA = parseCityInfo(dir1,1,argv[1])
