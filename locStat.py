@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from commands import getstatusoutput
+from info import storeInfo
 
 
 def main():
@@ -20,16 +21,22 @@ def main():
                 countries[path[len(path)-1]] = num
         except:
             pass
-        ofile = open("out/countryPop.csv",'w')
-        print >>ofile,"Country,Population,Twitter Population"
-        for country in countries.keys():
-            twitterPop = countries[country]
+    ofile = open("out/countryPop.csv",'w')
+    print >>ofile,"Country,Population,Twitter Population"
+    for country in countries.keys():
+        twitterPop = countries[country]
+        try:
+            pop = open("%s/info/%s.info"%(dir,country)).read().split("$xyzzy$")[0]
+        except:
             try:
-                pop = open("%s/info/%s.info"%(dir,country)).read().split("$xyzzy$")[0]
+                if country == "":
+                    raise Exception
+                gdir = "/project/wdim/geosocial"
+                pop,cent,type,box = storeInfo(gdir,country,country)
             except:
                 pop = "-1"
-            print >>ofile,"%s,%s,%d" % (country,pop,twitterPop)
-        ofile.close()
+        print >>ofile,"%s,%s,%d" % (country,pop,twitterPop)
+    ofile.close()
 
 
 if __name__ == "__main__":
